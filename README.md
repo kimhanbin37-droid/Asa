@@ -76,6 +76,40 @@ python gui_main.py
 > 설치본에는 기본 포함되어 있습니다. Linux에서 `tkinter`가 없다면
 > `sudo apt install python3-tk` 등으로 설치해 주세요.
 
+## 사용법 3: Windows .exe (Python 설치 없이 더블클릭 실행)
+
+Python을 설치하지 않은 랩 PC에서도 쓸 수 있도록 PyInstaller로 만든 실행파일을
+제공합니다. 방법은 두 가지입니다.
+
+### (A) GitHub Actions에서 자동 빌드된 exe 다운로드 (추천)
+
+이 저장소는 `.github/workflows/build-windows-exe.yml` 워크플로우를 통해
+`src/`, `main.py`, `gui_main.py`, `packaging/` 중 하나라도 변경되어 push되면
+자동으로 Windows용 exe를 빌드합니다.
+
+1. GitHub 저장소의 **Actions** 탭 → `Windows exe 빌드` 워크플로우 실행 목록에서
+   가장 최근 실행을 엽니다. (수동 실행하고 싶다면 "Run workflow" 버튼 사용)
+2. 실행이 끝나면 하단 **Artifacts**에서 `ExperimentDataReport-windows`를
+   다운로드합니다. 압축을 풀면 다음이 들어 있습니다.
+   - `ExperimentDataReport.exe` — GUI 버전 (더블클릭 실행)
+   - `ExperimentDataReportCLI.exe` — CLI 버전 (콘솔에서 `--config` 등 인자 사용)
+   - `config.example.yaml`, `raw_data_example.xlsx` — 참고용 예시 파일
+
+### (B) 로컬(Windows)에서 직접 빌드
+
+Windows PC에 Python이 설치되어 있다면 직접 빌드할 수도 있습니다.
+
+```powershell
+pip install -r requirements.txt
+pip install pyinstaller
+pyinstaller packaging\gui.spec   REM GUI 버전 -> dist\ExperimentDataReport.exe
+pyinstaller packaging\cli.spec   REM CLI 버전 -> dist\ExperimentDataReportCLI.exe
+```
+
+> exe는 반드시 Windows(또는 원하는 배포 대상 OS)에서 빌드해야 해당 OS에서
+> 실행됩니다. PyInstaller는 크로스 컴파일을 지원하지 않으므로, macOS/Linux에서
+> 빌드하면 그 OS용 실행파일이 만들어집니다.
+
 ## 결과 보고서 구성
 
 생성되는 엑셀 파일(`output/report.xlsx`)은 3개 시트로 구성됩니다.
@@ -92,6 +126,8 @@ gui_main.py             GUI 진입점
 config.example.yaml     설정 파일 예시
 data/                   예시 raw data
 scripts/                예시 데이터 생성 스크립트
+packaging/              PyInstaller .exe 빌드 spec (gui.spec, cli.spec)
+.github/workflows/      Windows exe 자동 빌드 GitHub Actions
 src/experiment_report/
   data_loader.py         raw data 엑셀 로딩 및 정규화
   summarizer.py          기준/비교 샘플 정리·비교표 계산
