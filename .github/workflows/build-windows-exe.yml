@@ -1,0 +1,47 @@
+name: Windows exe 빌드
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/experiment-data-automation-qd62gc
+    paths:
+      - "src/**"
+      - "main.py"
+      - "gui_main.py"
+      - "packaging/**"
+      - "requirements.txt"
+      - ".github/workflows/build-windows-exe.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 의존성 설치
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: 예시 데이터 생성
+        run: python scripts/make_example_data.py
+
+      - name: GUI exe 빌드
+        run: pyinstaller packaging/gui.spec
+
+      - name: CLI exe 빌드
+        run: pyinstaller packaging/cli.spec
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ExperimentDataReport-windows
+          path: |
+            dist/ExperimentDataReport.exe
+            dist/ExperimentDataReportCLI.exe
+            config.example.yaml
+            data/raw_data_example.xlsx
